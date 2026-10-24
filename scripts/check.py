@@ -10,8 +10,15 @@ manifest = XML.parse(app / 'config.xml').getroot()
 ns = {'w': 'http://www.w3.org/ns/widgets', 't': 'http://tizen.org/ns/widgets'}
 identity = manifest.find('t:application', ns)
 assert identity is not None, 'Missing application identity'
-assert identity.get('package') == 'nClrkHome1', 'Keep the installed package identity stable'
-assert identity.get('id') == 'nClrkHome1.FrameHome', 'Keep the installed application ID stable'
+assert identity.get('package') == 'CQ80T4f92a', 'Keep the independent CleanQ80T package identity stable'
+assert identity.get('id') == 'CQ80T4f92a.Home', 'Keep the independent CleanQ80T application ID stable'
+assert identity.get('required_version') == '5.5', 'CleanQ80T targets Tizen 5.5'
+assert ("var SELF = '" + identity.get('id') + "'") in (app / 'device.js').read_text(), 'Device self-filter differs from manifest'
+# M69 supports grid gap but not flex gap. All current layout spacing uses margins.
+for css in app.rglob('*.css'):
+    source = re.sub(r'/\*.*?\*/', '', css.read_text(), flags=re.S)
+    assert not re.search(r'(?:^|[;{])\s*(?:gap|row-gap|column-gap|inset)\s*:', source), 'Unsupported M69 layout property in ' + str(css)
+    assert ':focus-visible' not in source, 'Use the M69 focus fallback'
 assert manifest.get('version') == json.loads((root / 'package.json').read_text())['version'], 'Manifest/package versions differ'
 for tag in ['content', 'icon']:
     node = manifest.find('w:' + tag, ns)

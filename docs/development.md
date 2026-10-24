@@ -1,5 +1,18 @@
 # Development
 
+## CleanQ80T fork
+
+The current fork targets Tizen 5.5 / Chromium 69. Its identity is
+`CQ80T4f92a.Home` (package `CQ80T4f92a`) and its display name is CleanQ80T.
+It has no Frame Art Mode control. `npm run check` parses every packaged script
+as ES5 with development-only Acorn and rejects known unsupported layout CSS.
+Flex spacing uses sibling margins; full-size layers use explicit four-side
+positioning. See [the port audit and status](q80t-compatibility.md).
+
+The remaining setup instructions describe the upstream Mac/reference TV.
+Signing certificates, Linux SDK setup, app IDs and Samsung destinations have
+not been verified for the Q80T. Native Home/startup tooling remains unported.
+
 ## Browser preview
 
 Start with Node.js 22+ and Python 3.10+, then `npm ci`. These are the supported development baselines; lower versions have not been checked. Install Chromium once with `npx playwright install chromium` for the optional browser tools. Linux hosts may also need Playwright's documented system dependencies (`npx playwright install --with-deps chromium`).
@@ -18,7 +31,7 @@ All UI assets, public fonts and the fifteen wallpapers are bundled. This private
 - Preferences use localStorage key `cleanframe.home.v1`, with a fallback read from `cleanframe.shore.v1`. Legacy fields are `dock`, `wallpaper`, `mode`, `lastApp` and `theme`. The 0.6 migration preserves app order, wallpaper, rotation and selection. Legacy `list` becomes Dark / List / Type; `shore` and `grid` become Photo / Dock / Glass. Appearance axes are stored separately. A saved dynamic app keeps its real app ID and name; discovery refreshes the installed catalogue. Keep migration checks when changing this format.
 - `window.ShoreQA.state()` and `.where()` expose state and focus for browser tests. `minuteMs` can shorten rotation intervals in an isolated browser test.
 
-The tested target is the Tizen 9.0 TV in [TV status](tv-status.md). The manifest's `required_version="6.5"` is a package declaration, not proof that Tizen 6.5 has been tested. The exact TV Chromium/WebKit engine version has not been recorded. Keep runtime JavaScript ES5-compatible and verify any new DOM/CSS API on the target before claiming support. `node --check` checks syntax for Node; it does not enforce ES5 or TV API availability.
+The upstream tested target is the Tizen 9.0 TV in [TV status](tv-status.md). This fork's `required_version="5.5"` is a package declaration, not proof that Tizen 5.5 has been tested. The exact TV Chromium/WebKit engine version has not been recorded. Keep runtime JavaScript ES5-compatible and verify any new DOM/CSS API on the target before claiming support. `npm run check` enforces ES5 syntax; it does not establish TV API availability.
 
 Keep material rendering in the development tools. See [asset generation](assets.md) and [testing](testing.md).
 

@@ -1,4 +1,24 @@
-# CleanFrame
+# CleanQ80T
+
+A fork of [CleanFrame](https://github.com/nthnclrk/CleanFrame), adapted for the
+Samsung Q80T (2020), targeting Tizen 5.5 / Chromium 69. The app keeps the upstream
+List/Dock interface, wallpapers, remote navigation and preference migrations.
+Frame-only Art Mode is removed. CSS uses older-engine layout primitives and
+`npm run check` enforces ES5 JavaScript plus a focused CSS compatibility guard.
+
+This is a browser-validated port candidate; installation and rendering on the
+Q80T are not yet verified. See [Q80T compatibility](docs/q80t-compatibility.md).
+The app has its own identity, `CQ80T4f92a.Home`, and needs the owner's own Samsung
+certificates before installation. The retained native Home tools are unported
+reference code, guarded for the upstream TV. Do not use them for Q80T setup.
+
+Run `npm ci` then `npm run dev:public` for the local preview. No TV connection is
+needed. Signing/device tooling still needs a separate Linux setup task.
+
+The material below describes the upstream project and reference installation.
+Third-party assets and notices retain their original licensing.
+
+## Upstream CleanFrame
 
 A quieter home screen for Samsung The Frame. Your apps, a photograph and the time, with an interface made for the TV remote.
 
@@ -15,8 +35,7 @@ I highly recommend forking it and building on top of it, ideally with a coding a
 You need Node.js 22+ and Python 3.10+ to run the browser preview.
 
 ```sh
-git clone https://github.com/nthnclrk/CleanFrame.git
-cd CleanFrame
+cd /path/to/CleanQ80T
 npm ci
 npm run dev:public
 ```

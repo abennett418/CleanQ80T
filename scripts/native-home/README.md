@@ -1,3 +1,8 @@
+> CleanQ80T: this helper is unported reference code. Its target identity now
+> follows this fork, but its model/firmware/runtime guards remain upstream-only.
+> It is not a Q80T query, installer or Home-remapping tool. Do not relax those
+> guards without a separately authorised device investigation and recovery plan.
+
 # Native Home control
 
 This one-shot development helper is scoped to Nathan's Frame and firmware 2130.0. It does not run inside CleanFrame or remain active on the TV. It uses the existing SDB developer connection and the published package-name command workaround to execute as SDK UID 901. It does not request root or change security policy.

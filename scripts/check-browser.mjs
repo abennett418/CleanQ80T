@@ -13,7 +13,7 @@ const CATALOG = IDS.map((id, i) => ({ id, name: NAMES[i], show: true, iconPath: 
   { id: EXTRA, name: UNSAFE_NAME, show: true, iconPath: '' },
   { id: SPOTIFY, name: 'Spotify', show: true, iconPath: '' },
   { id: '5b8c3eb16b.BeamCTVDev', name: 'HBO Max', show: true, iconPath: '' },
-  { id: 'nClrkHome1.FrameHome', name: 'CleanFrame', show: true },
+  { id: 'CQ80T4f92a.Home', name: 'CleanQ80T', show: true },
   { id: 'AbCdEf1234.worker', name: 'Background worker', show: true },
   { id: 'com.samsung.tv.cobalt-yt', name: 'YouTube', show: true }
 ]);
@@ -200,6 +200,50 @@ async function noLiveFilters() {
 
 try {
   preview = await openPreview();
+  await run('Q80T controls and M69 layout fallbacks', async () => {
+    await page();
+    for (const width of [1920, 1280]) {
+      await current.setViewportSize({ width, height: width * 9 / 16 });
+      for (const layout of ['dock', 'list']) {
+        for (const controls of ['both', 'icons', 'text']) {
+          await look({ layout, controls }); await scene('home');
+          const actions = (await call('actions')).filter(a => a.startsWith('util.'));
+          check('Only Q80T controls ' + [width, layout, controls].join('/'), same(actions, ['util.apps', 'util.settings']), actions);
+          const geometry = await current.evaluate(() => {
+            const scale = document.getElementById('stage').getBoundingClientRect().width / 1920;
+            const buttons = [...document.querySelectorAll('#utils .u')].map(e => e.getBoundingClientRect());
+            const contents = [...document.querySelectorAll('#utils .u-content')].map(e => {
+              const children = [...e.children].filter(c => getComputedStyle(c).display !== 'none').map(c => c.getBoundingClientRect());
+              const bounds = e.getBoundingClientRect();
+              return children.length === 1 ? Math.abs(bounds.width - children[0].width) / scale :
+                Math.abs((children[1].left >= children[0].right ? children[1].left - children[0].right : children[0].left - children[1].right) / scale);
+            });
+            const stage = document.getElementById('stage').getBoundingClientRect();
+            return { contents, separation: (buttons[1].left - buttons[0].right) / scale,
+              aligned: Math.abs(buttons[0].right - buttons[1].right) / scale,
+              inside: buttons.every(b => b.left >= stage.left && b.right <= stage.right && b.top >= stage.top && b.bottom <= stage.bottom) };
+          });
+          check('Spacing survives layout and hidden children ' + [width, layout, controls].join('/'), geometry.inside &&
+            (layout === 'list' ? geometry.aligned < 1 : Math.abs(geometry.separation - ({ both: 20, icons: 16, text: 28 })[controls]) < 1) &&
+            geometry.contents.every((space, i) => Math.abs(space - (controls === 'both' ? layout === 'list' ? i ? 18.9 : 17.9 : 10 : 0)) < 1), geometry);
+          await nav(layout === 'list' ? 'right' : 'up');
+          await nav(layout === 'list' ? 'up' : 'left');
+          check('First remote control is All apps', (await state()).focusAction === 'util.apps');
+          await nav(layout === 'list' ? 'down' : 'right');
+          check('Next remote control is Settings', (await state()).focusAction === 'util.settings');
+          await nav('back');
+          check('Back restores one app focus', (await call('where')).focusCount === 1 && (await state()).focusAction.startsWith('home.app.'));
+        }
+      }
+      await group('background');
+      const overlay = await current.evaluate(() => {
+        const a = document.getElementById('appearance').getBoundingClientRect(), b = document.getElementById('stage').getBoundingClientRect();
+        return ['left', 'top', 'width', 'height'].every(k => Math.abs(a[k] - b[k]) < 1);
+      });
+      check('Appearance overlay fills scaled stage ' + width, overlay);
+      await scene('home');
+    }
+  });
   await run('Legacy preference migration', async () => {
     for (const theme of ['list', 'shore', 'grid']) {
       await page({ seed: baseline({ theme, dock: ['youtube', 'netflix'], wallpaper: walls[1].id, lastApp: 'youtube', mode: '15' }) });
@@ -237,7 +281,7 @@ try {
   await run('Real catalogue and native launch boundary', async () => {
     await page(); await library();
     const names = await current.locator('[data-action^="apps.open."] .label').allTextContents();
-    check('Consumer catalogue excludes services, self and duplicate YouTube', names.length === 12 && names.filter(n => n === 'YouTube').length === 1 && !names.includes('CleanFrame') && !names.includes('Background worker'), names);
+    check('Consumer catalogue excludes services, self and duplicate YouTube', names.length === 12 && names.filter(n => n === 'YouTube').length === 1 && !names.includes('CleanQ80T') && !names.includes('Background worker'), names);
     check('Installed names stay text, including HTML punctuation', names.includes(UNSAFE_NAME) && !(await current.evaluate(() => window.__catalogXss)));
     check('Exploration fixtures do not appear', !names.includes('Plex') && !names.includes('Jellyfin'));
     await act('apps.open.' + SPOTIFY); await current.waitForFunction(() => __tv.calls.length > 0);
@@ -246,14 +290,12 @@ try {
     await scene('home'); await act('home.app.netflix'); await current.waitForFunction(() => __tv.calls.length === 2);
     check('Primary app keeps verified target', (await current.evaluate(() => __tv.calls.at(-1))).id === IDS[1]);
     await current.evaluate(() => window.dispatchEvent(new Event('focus')));
-    await act('util.art'); await current.waitForFunction(() => __tv.calls.length === 3);
-    const art = await current.evaluate(() => __tv.calls.at(-1));
-    check('Art Mode uses app-control with fullscreen request', art.method === 'launchAppControl' && art.id === 'org.tizen.art-app' && art.control.data.some(d => d.key === 'mode' && d.value[0] === 'fullscreen'), art);
+    check('Q80T has no Frame Art Mode control', !(await call('actions')).includes('util.art'));
     await current.evaluate(() => window.dispatchEvent(new Event('focus'))); await group('samsung'); await act('samsung.home');
-    await current.waitForFunction(() => __tv.calls.length === 4);
+    await current.waitForFunction(() => __tv.calls.length === 3);
     check('Samsung escape keeps CSFS target', (await current.evaluate(() => __tv.calls.at(-1))).id === 'com.samsung.tv.csfs');
     await current.evaluate(() => window.dispatchEvent(new Event('focus'))); await group('samsung'); await act('samsung.settings');
-    await current.waitForFunction(() => __tv.calls.length === 5);
+    await current.waitForFunction(() => __tv.calls.length === 4);
     check('TV settings keeps installed target', (await current.evaluate(() => __tv.calls.at(-1))).id === 'com.samsung.tv.coba.setting');
     await current.evaluate(() => { window.dispatchEvent(new Event('focus')); __tv.launchFailure = true; });
     await scene('home'); await act('home.app.netflix'); await current.waitForFunction(() => ShoreQA.where().view === 'message');
