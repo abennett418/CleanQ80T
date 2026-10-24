@@ -126,3 +126,45 @@ completed 406 checks with zero failures, including both target resolutions.
 List and Dock were also inspected in the public-font collaborative preview.
 The ES5 parser was checked to reject newer syntax. No device was contacted,
 no signed widget was built, and no Home/startup settings were changed.
+
+## First Q80T device inspection
+
+On 24 October 2026, the owner enabled Developer Mode and explicitly authorised
+SDB capability and installed-app-list reads. The connection succeeded.
+Capabilities report `platform_version:5.5`, `cpu_arch:armv7`, `profile_name:tv`.
+This confirms the Tizen baseline and architecture; the web-engine version has
+not been read directly. Addresses and raw diagnostics remain ignored locally.
+
+The installed-app list includes the expected primary IDs for Netflix, YouTube,
+Disney+, Prime Video, Apple TV, ABC iview and SBS On Demand. It also includes
+BINGE, Stan, Kayo, Spotify, Tubi, Hayu and 7plus. Stremio and Apple Music were not
+listed as installed apps and should not be initial shortcuts for this setup.
+App-list presence is not proof of a successful or visible app launch.
+
+No apps were installed or launched and no Home/startup values were read or
+changed in this inspection. Signing, installation and physical verification
+remain pending.
+
+Initial Home defaults now use the nine selected video services: Netflix,
+YouTube, Disney+, Prime Video, Apple TV, ABC iview, SBS On Demand, BINGE and
+Stan. Sport services, Tubi, Hayu and 7plus are excluded from the initial Home
+selection; no installed apps were removed. Spotify remains accessible through
+All apps. Existing saved Home choices remain intact. BINGE and Stan use initials
+or discovered native icons because bundled logos are not provided.
+
+After this selection change, source validation and all 411 public-font browser
+checks passed. Browser launch checks use mocked Tizen calls; actual TV launches
+remain untested.
+
+## First installation and launch
+
+With explicit owner approval, the official SDK installed the independently
+signed CleanQ80T 0.6.1 widget on the Q80T. The installer reported completion and
+the installed-app list confirmed `CQ80T4f92a.Home`. The launch command returned
+success. Owner confirmation of visible rendering and remote behaviour remains
+pending; command success alone is not visual evidence. No Home/startup settings
+were changed. Signing material, device addresses and raw logs remain local.
+
+The owner subsequently confirmed that the installation works on the TV. This
+establishes visible launcher operation on the Q80T; individual shortcut results
+and native Home/startup behaviour have not been separately confirmed.

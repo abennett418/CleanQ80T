@@ -200,6 +200,22 @@ async function noLiveFilters() {
 
 try {
   preview = await openPreview();
+  await run('Q80T initial Home selection', async () => {
+    await page({ seed: undefined, catalog: CATALOG.concat([
+      { id: 'as6cYRgkPy.Binge', name: 'BINGE', show: true },
+      { id: '73iTZRTc34.Stan', name: 'Stan', show: true }
+    ]) });
+    const expected = ['netflix', 'youtube', 'disneyplus', 'primevideo', 'appletv', 'abciview', 'sbs', 'binge', 'stan'];
+    check('Fresh preferences use the nine chosen video services', same((await state()).dock, expected));
+    await library(); await scene('home');
+    check('Discovery preserves chosen order', same((await state()).dock, expected));
+    check('Unbundled brands use initials instead of broken logos', await current.locator('[data-action="home.app.binge"] .monogram').count() === 1 && await current.locator('[data-action="home.app.stan"] .monogram').count() === 1);
+    await act('home.app.binge'); await current.waitForFunction(() => __tv.calls.length === 1);
+    check('BINGE launches its discovered native ID', (await current.evaluate(() => __tv.calls.at(-1))).id === 'as6cYRgkPy.Binge');
+    await current.evaluate(() => window.dispatchEvent(new Event('focus'))); await scene('home'); await act('home.app.stan');
+    await current.waitForFunction(() => __tv.calls.length === 2);
+    check('Stan launches its discovered native ID', (await current.evaluate(() => __tv.calls.at(-1))).id === '73iTZRTc34.Stan');
+  });
   await run('Q80T controls and M69 layout fallbacks', async () => {
     await page();
     for (const width of [1920, 1280]) {

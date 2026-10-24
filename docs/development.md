@@ -13,6 +13,22 @@ The remaining setup instructions describe the upstream Mac/reference TV.
 Signing certificates, Linux SDK setup, app IDs and Samsung destinations have
 not been verified for the Q80T. Native Home/startup tooling remains unported.
 
+## CleanQ80T signing
+
+`npm run package` uses the owner's official Samsung profile via ignored
+`.local/signing.json`. Its fields are `sdk_path` (SDK directory),
+`profiles_path` (Certificate Manager profiles XML), and `profile` (profile name).
+All must refer to the owner's local setup. Certificate passwords stay with the
+Samsung tools; the script does not rewrite SDK configuration files, certificate
+paths or profile contents. It explicitly selects the configured profiles file.
+
+The build excludes the proprietary-font overlay and writes
+`dist/CleanQ80T-unsigned.wgt` and `dist/CleanQ80T.wgt`. Each signing run uses a
+fresh output directory, checks both signature files and compares the packaged
+manifest with the current source. Preserve the author certificate for updates.
+`tv:install` now expects `dist/CleanQ80T.wgt`; its device transport remains a
+reference implementation requiring a separately authorised device task.
+
 ## Browser preview
 
 Start with Node.js 22+ and Python 3.10+, then `npm ci`. These are the supported development baselines; lower versions have not been checked. Install Chromium once with `npx playwright install chromium` for the optional browser tools. Linux hosts may also need Playwright's documented system dependencies (`npx playwright install --with-deps chromium`).
